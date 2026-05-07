@@ -182,7 +182,28 @@ phase_umask_walk() {
         022) chmod -R go-w   "$HOME" ;;
     esac
 }
-phase_sudoers()            { return 0; }
+phase_sudoers() {
+    target="/etc/sudoers.d/00-bootstrap0r-defaults"
+    tmp="$(mktemp "${TMPDIR:-/tmp}/bootstrap0r-sudoers.XXXXXX")"
+    cat >"$tmp" <<'EOF'
+Defaults timestamp_timeout=60,!tty_tickets
+Defaults rootpw
+EOF
+
+    if ! sudo visudo -cf "$tmp" >/dev/null; then
+        rm -f "$tmp"
+        die "sudoers drop-in failed visudo validation"
+    fi
+
+    if sudo test -f "$target" && sudo cmp -s "$tmp" "$target"; then
+        rm -f "$tmp"
+        log "sudoers drop-in already in place, skipping"
+        return 0
+    fi
+
+    sudo install -m 0440 -o root -g root "$tmp" "$target"
+    rm -f "$tmp"
+}
 phase_nadrbomz()           { return 0; }
 phase_apt_base()           { return 0; }
 phase_chrome()             { return 0; }
@@ -273,4 +294,4 @@ main() {
     print_summary
 }
 
-main "$@"
+[ "${BOOTSTRAP0R_NO_MAIN:-0}" = "1" ] || main "$@"
