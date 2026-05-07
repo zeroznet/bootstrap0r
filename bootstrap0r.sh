@@ -186,7 +186,7 @@ phase_sudoers() {
     target="/etc/sudoers.d/00-bootstrap0r-defaults"
     tmp="$(mktemp "${TMPDIR:-/tmp}/bootstrap0r-sudoers.XXXXXX")"
     cat >"$tmp" <<'EOF'
-Defaults timestamp_timeout=60,!tty_tickets
+Defaults timestamp_timeout=60,timestamp_type=global
 Defaults rootpw
 EOF
 
