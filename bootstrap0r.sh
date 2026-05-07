@@ -230,6 +230,14 @@ EOF
 }
 phase_nadrbomz() {
     curl -fsSL "$NADRBOMZ_URL" | sh
+
+    # nadrbomz installs the zsh config but doesn't touch the login shell,
+    # so flip /etc/passwd's shell field to zsh if it isn't already.
+    zsh_path=$(command -v zsh) || die "zsh not found after phase_apt_base"
+    current_shell=$(getent passwd "$USER" | cut -d: -f7)
+    if [ "$current_shell" != "$zsh_path" ]; then
+        sudo chsh -s "$zsh_path" "$USER"
+    fi
 }
 phase_apt_base() {
     sudo dpkg --add-architecture i386
@@ -241,7 +249,7 @@ phase_apt_base() {
         mesa-vulkan-drivers mesa-vulkan-drivers:i386 \
         vulkan-tools \
         gamemode \
-        mangohud
+        mangohud mangohud:i386
 }
 phase_chrome() {
     if dpkg -s google-chrome-stable >/dev/null 2>&1; then
@@ -268,11 +276,13 @@ phase_steam() {
     rm -f "$deb"
 }
 phase_flatpak_protonplus() {
-    flatpak remote-add --if-not-exists flathub \
+    # User-scoped install: no sudo, no polkit (system scope fails on WSL
+    # where polkit isn't wired up).
+    flatpak --user remote-add --if-not-exists flathub \
         https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    if ! flatpak info com.vysp3r.ProtonPlus >/dev/null 2>&1; then
-        flatpak install -y --noninteractive flathub com.vysp3r.ProtonPlus
+    if ! flatpak info --user com.vysp3r.ProtonPlus >/dev/null 2>&1; then
+        flatpak --user install -y --noninteractive flathub com.vysp3r.ProtonPlus
     fi
 
     flatpak override --user --filesystem="$HOME/.steam"             com.vysp3r.ProtonPlus
