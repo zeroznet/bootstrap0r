@@ -48,21 +48,20 @@ step_label() {
     printf '[%d/%d] %s... ' "$CURRENT_STEP" "$TOTAL_STEPS" "$1" >&2
 }
 
-# Braille spinner. cut -c on Debian 13 coreutils counts characters under a
-# UTF-8 locale, which matches the host. Switch to ASCII frames if a target
-# system shows garbled glyphs.
+# ASCII spinner. Single-byte frames so cut -c indexes correctly regardless
+# of locale; multi-byte (e.g. braille) frames fragment under GNU cut and
+# render as replacement chars in some terminals (notably Windows Terminal + WSL).
 spin_start() {
     if ! is_tty; then
         return 0
     fi
     (
-        frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+        frames='|/-\'
         i=0
-        # shellcheck disable=SC2034
         while :; do
             frame=$(printf '%s' "$frames" | cut -c "$((i + 1))")
             printf '\b%s' "$frame" >&2
-            i=$(((i + 1) % 10))
+            i=$(((i + 1) % 4))
             sleep 0.1
         done
     ) &
