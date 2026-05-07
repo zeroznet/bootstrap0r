@@ -207,7 +207,17 @@ EOF
 phase_nadrbomz() {
     curl -fsSL "$NADRBOMZ_URL" | sh
 }
-phase_apt_base()           { return 0; }
+phase_apt_base() {
+    sudo dpkg --add-architecture i386
+    apt_update_once
+    apt_install \
+        curl ca-certificates gnupg \
+        flatpak \
+        mesa-vulkan-drivers mesa-vulkan-drivers:i386 \
+        vulkan-tools \
+        gamemode \
+        mangohud
+}
 phase_chrome()             { return 0; }
 phase_steam()              { return 0; }
 phase_flatpak_protonplus() { return 0; }
