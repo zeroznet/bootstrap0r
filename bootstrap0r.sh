@@ -218,7 +218,18 @@ phase_apt_base() {
         gamemode \
         mangohud
 }
-phase_chrome()             { return 0; }
+phase_chrome() {
+    if dpkg -s google-chrome-stable >/dev/null 2>&1; then
+        printf 'google-chrome-stable already installed, skipping\n'
+        return 0
+    fi
+    deb="${TMPDIR:-/tmp}/bootstrap0r-google-chrome.deb"
+    _tmp_debs="$_tmp_debs $deb"
+    curl -fsSL -o "$deb" \
+        https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo apt install -y "$deb"
+    rm -f "$deb"
+}
 phase_steam()              { return 0; }
 phase_flatpak_protonplus() { return 0; }
 phase_finalize()           { return 0; }
