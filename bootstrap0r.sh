@@ -242,6 +242,9 @@ phase_nadrbomz() {
 phase_apt_base() {
     sudo dpkg --add-architecture i386
     apt_update_once
+    sudo DEBIAN_FRONTEND=noninteractive apt -y full-upgrade
+    sudo DEBIAN_FRONTEND=noninteractive apt -y autoremove --purge
+    sudo apt -y autoclean
     apt_install \
         curl ca-certificates gnupg \
         zsh \
@@ -289,12 +292,9 @@ phase_flatpak_protonplus() {
     flatpak override --user --filesystem="$HOME/.local/share/Steam" com.vysp3r.ProtonPlus
 }
 phase_finalize() {
-    # Re-update so newly added Chrome/Steam repos are seen, then full-upgrade
-    # the base, prune orphans, and trim the deb cache.
-    sudo apt update
-    sudo DEBIAN_FRONTEND=noninteractive apt -y full-upgrade
-    sudo DEBIAN_FRONTEND=noninteractive apt -y autoremove --purge
-    sudo apt -y autoclean
+    # Reserved hook for post-install tweaks (default browser, MIME, etc.).
+    # No-op today; print_summary is called from main after this.
+    return 0
 }
 
 print_summary() {
@@ -336,12 +336,13 @@ Env:
 Phases (run in order):
   1. Clamp permissions on \$HOME to UMASK
   2. Install sudoers defaults (/etc/sudoers.d/00-bootstrap0r-defaults)
-  3. Add i386 multiarch + base/gaming packages (incl. zsh)
+  3. Add i386 multiarch, apt update + full-upgrade + autoremove --purge +
+     autoclean, then install base/gaming packages (incl. zsh)
   4. Bootstrap shell via nadrbomz (curl-pipe install)
   5. Install Google Chrome (.deb)
   6. Install Steam (.deb)
   7. Set up Flathub + ProtonPlus
-  8. Final touches: apt update + full-upgrade + autoremove --purge + autoclean, summary
+  8. Final touches + summary
 
 Repo: https://github.com/zeroznet/bootstrap0r
 EOF

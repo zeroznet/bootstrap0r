@@ -42,12 +42,12 @@ Script-specific points:
 
 1. `phase_umask_walk`        — chmod `$HOME` to match `$UMASK` (077 default, 022 alt)
 2. `phase_sudoers`           — install `/etc/sudoers.d/00-bootstrap0r-defaults`
-3. `phase_apt_base`          — i386 multiarch + base/gaming packages (incl. `zsh`, prereq for nadrbomz)
+3. `phase_apt_base`          — i386 multiarch, `apt update` + `full-upgrade` + `autoremove --purge` + `autoclean`, then install base/gaming packages (incl. `zsh`, prereq for nadrbomz)
 4. `phase_nadrbomz`          — curl-pipe `https://github.com/zeroznet/nadrbomz`
 5. `phase_chrome`            — Google official `.deb`
 6. `phase_steam`             — Valve official `.deb`
 7. `phase_flatpak_protonplus` — Flathub + `com.vysp3r.ProtonPlus` + Steam path overrides
-8. `phase_finalize`          — `apt update` + `full-upgrade` + `autoremove --purge` + `autoclean`
+8. `phase_finalize`          — reserved hook (no-op today)
 
 Flags: `--help`, `--dry-run`, `--allow-root`. Env: `UMASK=077|022`, `ROOTPW=0|1` (opt-in `Defaults rootpw`; preflight refuses if root is locked/empty). Logs to `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log`.
 
