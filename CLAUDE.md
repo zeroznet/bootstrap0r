@@ -47,7 +47,7 @@ Script-specific points:
 5. `phase_chrome`            — Google official `.deb`
 6. `phase_steam`             — Valve official `.deb`
 7. `phase_flatpak_protonplus` — Flathub + `com.vysp3r.ProtonPlus` + Steam path overrides
-8. `phase_finalize`          — reserved hook (no-op today)
+8. `phase_finalize`          — `apt update` + `full-upgrade` + `autoremove --purge` + `autoclean`
 
 Flags: `--help`, `--dry-run`, `--allow-root`. Env: `UMASK=077|022`, `ROOTPW=0|1` (opt-in `Defaults rootpw`; preflight refuses if root is locked/empty). Logs to `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log`.
 

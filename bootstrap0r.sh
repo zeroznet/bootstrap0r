@@ -289,9 +289,12 @@ phase_flatpak_protonplus() {
     flatpak override --user --filesystem="$HOME/.local/share/Steam" com.vysp3r.ProtonPlus
 }
 phase_finalize() {
-    # Reserved hook for post-install tweaks (default browser, MIME, etc.).
-    # No-op today; print_summary is called from main after this.
-    return 0
+    # Re-update so newly added Chrome/Steam repos are seen, then full-upgrade
+    # the base, prune orphans, and trim the deb cache.
+    sudo apt update
+    sudo DEBIAN_FRONTEND=noninteractive apt -y full-upgrade
+    sudo DEBIAN_FRONTEND=noninteractive apt -y autoremove --purge
+    sudo apt -y autoclean
 }
 
 print_summary() {
@@ -338,7 +341,7 @@ Phases (run in order):
   5. Install Google Chrome (.deb)
   6. Install Steam (.deb)
   7. Set up Flathub + ProtonPlus
-  8. Final touches + summary
+  8. Final touches: apt update + full-upgrade + autoremove --purge + autoclean, summary
 
 Repo: https://github.com/zeroznet/bootstrap0r
 EOF
