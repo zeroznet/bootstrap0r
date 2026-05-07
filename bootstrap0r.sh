@@ -105,6 +105,91 @@ run_step() {
     fi
 }
 
+# ---------- apt helpers ----------
+apt_update_once() {
+    if [ "$_apt_updated" -eq 0 ]; then
+        sudo apt update
+        _apt_updated=1
+    fi
+}
+
+# Filters out already-installed packages. Calls sudo apt install only on missing.
+apt_install() {
+    missing=""
+    for pkg in "$@"; do
+        if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+            missing="$missing $pkg"
+        fi
+    done
+    if [ -z "$missing" ]; then
+        printf 'all packages already installed: %s\n' "$*"
+        return 0
+    fi
+    # shellcheck disable=SC2086
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y $missing
+}
+
+validate_umask() {
+    case "$UMASK" in
+        077|022) : ;;
+        *) die "UMASK must be 077 or 022 (got: $UMASK)" ;;
+    esac
+}
+
+# ---------- cleanup ----------
+cleanup_on_exit() {
+    if [ -n "$_spinner_pid" ]; then
+        kill "$_spinner_pid" 2>/dev/null || true
+        _spinner_pid=""
+    fi
+    # Remove any temp .deb files we created. _tmp_debs is space-separated paths.
+    if [ -n "$_tmp_debs" ]; then
+        # shellcheck disable=SC2086
+        rm -f $_tmp_debs
+    fi
+}
+
+# ---------- preflight ----------
+preflight() {
+    if [ "$(id -u)" -eq 0 ] && [ "$ALLOW_ROOT" -eq 0 ]; then
+        die "refusing to run as root; sudo is invoked per-command. Use --allow-root to override."
+    fi
+
+    need_cmd curl
+    need_cmd git
+    need_cmd sudo
+
+    if [ "$DRY_RUN" -eq 0 ]; then
+        sudo -v
+    fi
+}
+
+# ---------- phases ----------
+phase_umask_walk()         { return 0; }
+phase_sudoers()            { return 0; }
+phase_nadrbomz()           { return 0; }
+phase_apt_base()           { return 0; }
+phase_chrome()             { return 0; }
+phase_steam()              { return 0; }
+phase_flatpak_protonplus() { return 0; }
+phase_finalize()           { return 0; }
+
+print_summary() {
+    cat >&2 <<EOF
+
+==> Done.
+Log: $LOG_FILE
+
+Next steps:
+  1. Launch Steam, login
+  2. Open ProtonPlus (com.vysp3r.ProtonPlus), install latest GE-Proton
+  3. Steam launch options (e.g. for Cyberpunk 2077):
+     gamemoderun mangohud PROTON_ENABLE_WAYLAND=1 PROTON_ENABLE_HDR=1 \\
+       PROTON_FSR4_UPGRADE=1 PROTON_FSR4_INDICATOR=1 %command% \\
+       --launcher-skip --intro-skip
+EOF
+}
+
 # ---------- usage / args ----------
 usage() {
     cat <<EOF
@@ -151,7 +236,25 @@ parse_args() {
 # ---------- main ----------
 main() {
     parse_args "$@"
-    log "bootstrap0r: parsed args (DRY_RUN=$DRY_RUN ALLOW_ROOT=$ALLOW_ROOT UMASK=$UMASK)"
+    validate_umask
+    : > "$LOG_FILE"
+    trap cleanup_on_exit EXIT HUP INT TERM
+
+    preflight
+    umask "$UMASK"
+
+    log "==> bootstrap0r — Linux env bootstrap (UMASK=$UMASK)"
+
+    run_step "Clamping permissions on \$HOME ($UMASK)" phase_umask_walk
+    run_step "Installing sudoers defaults"               phase_sudoers
+    run_step "Bootstrapping shell (nadrbomz)"            phase_nadrbomz
+    run_step "Adding i386 multiarch and base packages"   phase_apt_base
+    run_step "Installing Google Chrome"                  phase_chrome
+    run_step "Installing Steam"                          phase_steam
+    run_step "Setting up Flathub + ProtonPlus"           phase_flatpak_protonplus
+    run_step "Final touches"                             phase_finalize
+
+    print_summary
 }
 
 main "$@"
