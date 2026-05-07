@@ -37,6 +37,74 @@ need_cmd() {
     has_cmd "$1" || die "Missing required command: $1"
 }
 
+# ---------- UI helpers ----------
+is_tty() {
+    [ -t 1 ] && [ -t 2 ]
+}
+
+step_label() {
+    CURRENT_STEP=$((CURRENT_STEP + 1))
+    printf '[%d/%d] %s... ' "$CURRENT_STEP" "$TOTAL_STEPS" "$1" >&2
+}
+
+# Braille spinner. cut -c on Debian 13 coreutils counts characters under a
+# UTF-8 locale, which matches the host. Switch to ASCII frames if a target
+# system shows garbled glyphs.
+spin_start() {
+    if ! is_tty; then
+        return 0
+    fi
+    (
+        frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+        i=0
+        # shellcheck disable=SC2034
+        while :; do
+            frame=$(printf '%s' "$frames" | cut -c "$((i + 1))")
+            printf '\b%s' "$frame" >&2
+            i=$(((i + 1) % 10))
+            sleep 0.1
+        done
+    ) &
+    _spinner_pid=$!
+    # Print a placeholder char so the first \b has something to overwrite.
+    printf ' ' >&2
+}
+
+spin_stop() {
+    if [ -n "$_spinner_pid" ]; then
+        kill "$_spinner_pid" 2>/dev/null || true
+        wait "$_spinner_pid" 2>/dev/null || true
+        _spinner_pid=""
+        # Erase the spinner char.
+        printf '\b \b' >&2
+    fi
+}
+
+run_step() {
+    label="$1"
+    shift
+    step_label "$label"
+
+    if [ "$DRY_RUN" -eq 1 ]; then
+        printf '[DRY] %s\n' "$*" >&2
+        return 0
+    fi
+
+    spin_start
+    if "$@" >>"$LOG_FILE" 2>&1; then
+        spin_stop
+        printf 'OK\n' >&2
+    else
+        rc=$?
+        spin_stop
+        printf 'FAIL\n' >&2
+        printf 'Log: %s\n' "$LOG_FILE" >&2
+        printf '%s\n' '--- last 20 lines of log ---' >&2
+        tail -n 20 "$LOG_FILE" >&2 || true
+        exit "$rc"
+    fi
+}
+
 # ---------- usage / args ----------
 usage() {
     cat <<EOF
