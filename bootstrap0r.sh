@@ -253,7 +253,11 @@ phase_flatpak_protonplus() {
     flatpak override --user --filesystem="$HOME/.steam"             com.vysp3r.ProtonPlus
     flatpak override --user --filesystem="$HOME/.local/share/Steam" com.vysp3r.ProtonPlus
 }
-phase_finalize()           { return 0; }
+phase_finalize() {
+    # Reserved hook for post-install tweaks (default browser, MIME, etc.).
+    # No-op today; print_summary is called from main after this.
+    return 0
+}
 
 print_summary() {
     cat >&2 <<EOF
