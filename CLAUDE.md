@@ -38,7 +38,28 @@ Script-specific points:
 
 ## Status
 
-Greenfield. No code yet. Once `bootstrap.sh` (or whatever the entry point ends up being) lands, document the run command, supported flags, and the high-level phase ordering here.
+`bootstrap0r.sh` is the entry point. Run it directly or via the curl-pipe one-liner from the README. Phases run in fixed order:
+
+1. `phase_umask_walk`        — chmod `$HOME` to match `$UMASK` (077 default, 022 alt)
+2. `phase_sudoers`           — install `/etc/sudoers.d/00-bootstrap0r-defaults`
+3. `phase_nadrbomz`          — curl-pipe `https://github.com/zeroznet/nadrbomz`
+4. `phase_apt_base`          — i386 multiarch + base/gaming packages
+5. `phase_chrome`            — Google official `.deb`
+6. `phase_steam`             — Valve official `.deb`
+7. `phase_flatpak_protonplus` — Flathub + `com.vysp3r.ProtonPlus` + Steam path overrides
+8. `phase_finalize`          — reserved hook (no-op today)
+
+Flags: `--help`, `--dry-run`, `--allow-root`. Env: `UMASK=077|022`. Logs to `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log`.
+
+The `BOOTSTRAP0R_NO_MAIN=1` guard at the bottom of the script lets you `source` it for per-phase debugging:
+
+```sh
+BOOTSTRAP0R_NO_MAIN=1 . ./bootstrap0r.sh
+phase_sudoers   # for example
+```
+
+Spec: `docs/superpowers/specs/2026-05-07-bootstrap0r-design.md`.
+Plan: `docs/superpowers/plans/2026-05-07-bootstrap0r-implementation.md`.
 
 ## Repo
 
