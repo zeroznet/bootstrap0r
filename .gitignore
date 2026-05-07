@@ -1,0 +1,7 @@
+.claude/settings.local.json
+.env
+.env.*
+*.swp
+.DS_Store
+HANDOFF.md
+HANDOFF.md.bak
