@@ -362,12 +362,12 @@ main() {
     parse_args "$@"
     validate_umask
     validate_rootpw
+    umask "$UMASK"
     : > "$LOG_FILE"
     trap cleanup_on_exit EXIT HUP INT TERM
 
     preflight
     check_root_password_or_die
-    umask "$UMASK"
 
     log "==> bootstrap0r — Linux env bootstrap (UMASK=$UMASK)"
 
