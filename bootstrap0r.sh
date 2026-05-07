@@ -212,6 +212,7 @@ phase_apt_base() {
     apt_update_once
     apt_install \
         curl ca-certificates gnupg \
+        zsh \
         flatpak \
         mesa-vulkan-drivers mesa-vulkan-drivers:i386 \
         vulkan-tools \
@@ -294,8 +295,8 @@ Env:
 Phases (run in order):
   1. Clamp permissions on \$HOME to UMASK
   2. Install sudoers defaults (/etc/sudoers.d/00-bootstrap0r-defaults)
-  3. Bootstrap shell via nadrbomz (curl-pipe install)
-  4. Add i386 multiarch + base/gaming packages
+  3. Add i386 multiarch + base/gaming packages (incl. zsh)
+  4. Bootstrap shell via nadrbomz (curl-pipe install)
   5. Install Google Chrome (.deb)
   6. Install Steam (.deb)
   7. Set up Flathub + ProtonPlus
@@ -332,8 +333,8 @@ main() {
 
     run_step "Clamping permissions on \$HOME ($UMASK)" phase_umask_walk
     run_step "Installing sudoers defaults"               phase_sudoers
-    run_step "Bootstrapping shell (nadrbomz)"            phase_nadrbomz
     run_step "Adding i386 multiarch and base packages"   phase_apt_base
+    run_step "Bootstrapping shell (nadrbomz)"            phase_nadrbomz
     run_step "Installing Google Chrome"                  phase_chrome
     run_step "Installing Steam"                          phase_steam
     run_step "Setting up Flathub + ProtonPlus"           phase_flatpak_protonplus
