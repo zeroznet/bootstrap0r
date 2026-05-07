@@ -49,7 +49,7 @@ Script-specific points:
 7. `phase_flatpak_protonplus` — Flathub + `com.vysp3r.ProtonPlus` + Steam path overrides
 8. `phase_finalize`          — reserved hook (no-op today)
 
-Flags: `--help`, `--dry-run`, `--allow-root`. Env: `UMASK=077|022`. Logs to `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log`.
+Flags: `--help`, `--dry-run`, `--allow-root`. Env: `UMASK=077|022`, `ROOTPW=0|1` (opt-in `Defaults rootpw`; preflight refuses if root is locked/empty). Logs to `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log`.
 
 The `BOOTSTRAP0R_NO_MAIN=1` guard at the bottom of the script lets you `source` it for per-phase debugging:
 

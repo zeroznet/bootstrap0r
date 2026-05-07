@@ -5,6 +5,7 @@ set -eu
 
 # ---------- globals ----------
 UMASK="${UMASK:-077}"
+ROOTPW="${ROOTPW:-0}"
 LOG_FILE="${TMPDIR:-/tmp}/bootstrap0r-$(date +%Y%m%d%H%M%S).log"
 NADRBOMZ_URL="https://raw.githubusercontent.com/zeroznet/nadrbomz/main/nadrbomz.sh"
 DRY_RUN=0
@@ -136,6 +137,28 @@ validate_umask() {
     esac
 }
 
+validate_rootpw() {
+    case "$ROOTPW" in
+        0|1) : ;;
+        *) die "ROOTPW must be 0 or 1 (got: $ROOTPW)" ;;
+    esac
+}
+
+# When ROOTPW=1, refuse to install a Defaults rootpw drop-in if root has no
+# usable password. Otherwise sudo would prompt for a password that doesn't
+# exist and lock the user out. Skipped under --dry-run since it needs sudo.
+check_root_password_or_die() {
+    [ "$ROOTPW" -eq 1 ] || return 0
+    [ "$DRY_RUN" -eq 0 ] || return 0
+    status=$(sudo passwd -S root 2>/dev/null | awk '{print $2}')
+    case "$status" in
+        P)  : ;;
+        L|LK) die "ROOTPW=1 but root account is locked. Run: sudo passwd root  (then re-run)" ;;
+        NP) die "ROOTPW=1 but root has no password. Run: sudo passwd root  (then re-run)" ;;
+        *)  die "ROOTPW=1 but could not determine root password status (passwd -S root said: ${status:-empty})" ;;
+    esac
+}
+
 # ---------- cleanup ----------
 cleanup_on_exit() {
     if [ -n "$_spinner_pid" ]; then
@@ -188,6 +211,9 @@ phase_sudoers() {
     cat >"$tmp" <<'EOF'
 Defaults timestamp_timeout=60
 EOF
+    if [ "$ROOTPW" -eq 1 ]; then
+        printf 'Defaults rootpw\n' >>"$tmp"
+    fi
 
     if ! sudo visudo -cf "$tmp" >/dev/null; then
         rm -f "$tmp"
@@ -290,6 +316,10 @@ Flags:
 
 Env:
   UMASK          077 (default) or 022. Other values rejected.
+  ROOTPW         0 (default) or 1. If 1, sudoers drop-in includes
+                 'Defaults rootpw' so sudo prompts for root's password.
+                 Refused at preflight if root is locked or has no password.
+                 Pointless on WSL: 'wsl -u root' bypasses it from Windows.
 
 Phases (run in order):
   1. Clamp permissions on \$HOME to UMASK
@@ -322,10 +352,12 @@ parse_args() {
 main() {
     parse_args "$@"
     validate_umask
+    validate_rootpw
     : > "$LOG_FILE"
     trap cleanup_on_exit EXIT HUP INT TERM
 
     preflight
+    check_root_password_or_die
     umask "$UMASK"
 
     log "==> bootstrap0r — Linux env bootstrap (UMASK=$UMASK)"
