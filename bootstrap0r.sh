@@ -187,7 +187,6 @@ phase_sudoers() {
     tmp="$(mktemp "${TMPDIR:-/tmp}/bootstrap0r-sudoers.XXXXXX")"
     cat >"$tmp" <<'EOF'
 Defaults timestamp_timeout=60
-Defaults rootpw
 EOF
 
     if ! sudo visudo -cf "$tmp" >/dev/null; then
