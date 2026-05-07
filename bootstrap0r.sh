@@ -178,7 +178,6 @@ preflight() {
     fi
 
     need_cmd curl
-    need_cmd git
     need_cmd sudo
 
     if [ "$DRY_RUN" -eq 0 ]; then
@@ -247,7 +246,7 @@ phase_apt_base() {
     sudo apt -y autoclean
     apt_install \
         curl ca-certificates gnupg \
-        zsh \
+        git zsh \
         flatpak \
         mesa-vulkan-drivers mesa-vulkan-drivers:i386 \
         vulkan-tools \
