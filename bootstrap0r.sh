@@ -230,7 +230,18 @@ phase_chrome() {
     sudo apt install -y "$deb"
     rm -f "$deb"
 }
-phase_steam()              { return 0; }
+phase_steam() {
+    if dpkg -s steam-launcher >/dev/null 2>&1; then
+        printf 'steam-launcher already installed, skipping\n'
+        return 0
+    fi
+    deb="${TMPDIR:-/tmp}/bootstrap0r-steam.deb"
+    _tmp_debs="$_tmp_debs $deb"
+    curl -fsSL -o "$deb" \
+        https://repo.steampowered.com/steam/archive/stable/steam_latest.deb
+    sudo apt install -y "$deb"
+    rm -f "$deb"
+}
 phase_flatpak_protonplus() { return 0; }
 phase_finalize()           { return 0; }
 
