@@ -252,7 +252,7 @@ phase_apt_base() {
         mesa-vulkan-drivers mesa-vulkan-drivers:i386 \
         vulkan-tools \
         gamemode \
-        mangohud mangohud:i386
+        mangohud
 }
 phase_chrome() {
     if dpkg -s google-chrome-stable >/dev/null 2>&1; then
