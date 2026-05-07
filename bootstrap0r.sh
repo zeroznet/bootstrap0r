@@ -165,7 +165,23 @@ preflight() {
 }
 
 # ---------- phases ----------
-phase_umask_walk()         { return 0; }
+phase_umask_walk() {
+    if [ "$DRY_RUN" -eq 1 ]; then
+        # In --dry-run, run_step short-circuited and never calls us. Belt-and-suspenders:
+        case "$UMASK" in
+            077) count=$(find "$HOME" -perm /go=rwx 2>/dev/null | wc -l) ;;
+            022) count=$(find "$HOME" -perm /go=w   2>/dev/null | wc -l) ;;
+        esac
+        # shellcheck disable=SC2016
+        printf '[DRY] %s files/dirs in $HOME would be tightened\n' "$count"
+        return 0
+    fi
+
+    case "$UMASK" in
+        077) chmod -R go-rwx "$HOME" ;;
+        022) chmod -R go-w   "$HOME" ;;
+    esac
+}
 phase_sudoers()            { return 0; }
 phase_nadrbomz()           { return 0; }
 phase_apt_base()           { return 0; }
