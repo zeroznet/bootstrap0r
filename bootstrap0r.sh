@@ -204,7 +204,9 @@ EOF
     sudo install -m 0440 -o root -g root "$tmp" "$target"
     rm -f "$tmp"
 }
-phase_nadrbomz()           { return 0; }
+phase_nadrbomz() {
+    curl -fsSL "$NADRBOMZ_URL" | sh
+}
 phase_apt_base()           { return 0; }
 phase_chrome()             { return 0; }
 phase_steam()              { return 0; }
