@@ -242,7 +242,17 @@ phase_steam() {
     sudo apt install -y "$deb"
     rm -f "$deb"
 }
-phase_flatpak_protonplus() { return 0; }
+phase_flatpak_protonplus() {
+    flatpak remote-add --if-not-exists flathub \
+        https://dl.flathub.org/repo/flathub.flatpakrepo
+
+    if ! flatpak info com.vysp3r.ProtonPlus >/dev/null 2>&1; then
+        flatpak install -y --noninteractive flathub com.vysp3r.ProtonPlus
+    fi
+
+    flatpak override --user --filesystem="$HOME/.steam"             com.vysp3r.ProtonPlus
+    flatpak override --user --filesystem="$HOME/.local/share/Steam" com.vysp3r.ProtonPlus
+}
 phase_finalize()           { return 0; }
 
 print_summary() {
