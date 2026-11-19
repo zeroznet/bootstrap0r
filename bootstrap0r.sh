@@ -56,6 +56,7 @@ spin_start() {
         return 0
     fi
     (
+        # shellcheck disable=SC1003
         frames='|/-\'
         i=0
         while :; do

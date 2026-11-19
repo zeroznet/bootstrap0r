@@ -1,0 +1,48 @@
+# scripted/written by Robert Bopko (github.com/zeroznet) with Boba Bott (Claude Opus 5.5)
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: read-all
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-26.04
+    steps:
+      # Major tag instead of a SHA pin: no dependency bot runs on this repo,
+      # and the job only reads the checkout and holds no secrets.
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install dash and shellcheck
+        run: |
+          set -eu
+          sudo apt-get update -q
+          sudo apt-get install -y -q dash shellcheck
+
+      - name: shellcheck
+        run: shellcheck -s sh bootstrap0r.sh
+
+      # The curl | sh one-liner runs under dash on Debian, so dash parsing is the gate.
+      - name: Syntax
+        run: dash -n bootstrap0r.sh
+
+      # A full run installs system packages, so only the arg path is exercised.
+      - name: Help smoke run
+        run: |
+          set -eu
+          dash bootstrap0r.sh --help >/dev/null
+          if dash bootstrap0r.sh --bogus >/dev/null 2>&1; then
+            echo "::error::unknown flag was accepted"
+            exit 1
+          fi
