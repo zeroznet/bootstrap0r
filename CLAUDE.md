@@ -58,8 +58,6 @@ BOOTSTRAP0R_NO_MAIN=1 . ./bootstrap0r.sh
 phase_sudoers   # for example
 ```
 
-Spec: `docs/superpowers/specs/2026-05-07-bootstrap0r-design.md`.
-Plan: `docs/superpowers/plans/2026-05-07-bootstrap0r-implementation.md`.
 
 ## Repo
 
