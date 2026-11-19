@@ -2,8 +2,6 @@
 
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Purpose
 
 `bootstrap0r` is Robert's personal Linux bootstrap script. Run it on a fresh install (or a clobbered home dir) and it brings the box back to the working environment Robert expects: shell defaults, umask, repos and keys for third-party packages, a curated set of installs (e.g. Chrome), and any post-install tweaks.
@@ -20,7 +18,6 @@ In scope:
 - Shell/login defaults (umask, PATH, locale).
 - APT sources, keyrings, and package installs.
 - Third-party repos installed the supported way (signed-by keyrings under `/etc/apt/keyrings`, never `apt-key`).
-- Idempotent re-runs: running the script twice should be a no-op the second time.
 
 Out of scope unless explicitly requested:
 - Dotfiles (Robert manages those separately).
@@ -34,7 +31,6 @@ Inherits everything from `/home/zero/dev/CLAUDE.md` (workspace rules, persona, c
 Script-specific points:
 - Every operation that touches the system must be **idempotent** and **safe to re-run**. Check before acting (`dpkg -s`, file existence, current value of a setting) instead of blindly applying.
 - Privileged operations: prefer `sudo` invoked per-command over running the whole script as root. The script should refuse to run as root unless an explicit flag says otherwise.
-- Add a `--dry-run` mode early; destructive system changes without one are a footgun.
 - Verify checksums or signatures for anything pulled outside APT.
 
 ## Status

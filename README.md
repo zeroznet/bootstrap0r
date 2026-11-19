@@ -20,7 +20,7 @@ Personal Linux environment bootstrap for Debian 13 / Ubuntu.
 - installs Steam (Valve official `.deb`)
 - sets up Flathub + ProtonPlus, with Steam paths exposed to ProtonPlus
 
-Idempotent. Re-runs are no-ops once steps complete.
+Idempotent.
 
 Every run starts with `apt full-upgrade` + `autoremove --purge` + `autoclean`, so a
 re-run also upgrades installed APT packages. Flatpak updates are left to normal
