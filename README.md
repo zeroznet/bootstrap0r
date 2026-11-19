@@ -22,9 +22,10 @@ Personal Linux environment bootstrap for Debian 13 / Ubuntu.
 
 Idempotent. Re-runs are no-ops once steps complete.
 
-Updates of installed packages are not handled by `bootstrap0r`; they flow through
-normal `apt upgrade` and `flatpak update` (Chrome and Steam each install their own
-apt repo via `.deb` post-install hooks).
+Every run starts with `apt full-upgrade` + `autoremove --purge` + `autoclean`, so a
+re-run also upgrades installed APT packages. Flatpak updates are left to normal
+`flatpak update` (Chrome and Steam each install their own apt repo via `.deb`
+post-install hooks, so they upgrade with APT).
 
 ## One-line install
 
