@@ -1,5 +1,12 @@
 # bootstrap0r
 
+<p align="center">
+  <a href="https://github.com/zeroznet/bootstrap0r/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/zeroznet/bootstrap0r/ci.yml?branch=main&style=flat-square&label=ci&labelColor=000000" alt="CI"></a>
+  <a href="https://github.com/zeroznet/bootstrap0r/commits/main"><img src="https://img.shields.io/github/last-commit/zeroznet/bootstrap0r?style=flat-square&labelColor=000000&color=ff5fff" alt="Last Commit"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/zeroznet/bootstrap0r?style=flat-square&labelColor=000000&color=875fff" alt="License"></a>
+  <img src="https://img.shields.io/badge/shell-POSIX%20sh-00ffff?style=flat-square&labelColor=000000" alt="POSIX sh">
+</p>
+
 Personal Linux environment bootstrap for Debian 13 / Ubuntu.
 
 ## What it does
