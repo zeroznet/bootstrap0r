@@ -1,3 +1,5 @@
+<!-- written by Robert Bopko (github.com/zeroznet) with Boba Bott (Claude Opus 5.5) -->
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -30,26 +32,14 @@ Out of scope unless explicitly requested:
 Inherits everything from `/home/zero/dev/CLAUDE.md` (workspace rules, persona, commit style, attribution header, behavioral guidelines). Add project-specific details here only when they diverge or extend.
 
 Script-specific points:
-- POSIX `sh`, strict mode (`set -eu`), helpers `log`/`warn`/`die`/`has_cmd`/`need_cmd` per workspace convention.
 - Every operation that touches the system must be **idempotent** and **safe to re-run**. Check before acting (`dpkg -s`, file existence, current value of a setting) instead of blindly applying.
 - Privileged operations: prefer `sudo` invoked per-command over running the whole script as root. The script should refuse to run as root unless an explicit flag says otherwise.
-- `--help` / `usage()` is mandatory. Add a `--dry-run` mode early; destructive system changes without one are a footgun.
-- Network installs use `curl` first, `fetch` fallback, per workspace convention. Verify checksums or signatures for anything pulled outside APT.
+- Add a `--dry-run` mode early; destructive system changes without one are a footgun.
+- Verify checksums or signatures for anything pulled outside APT.
 
 ## Status
 
-`bootstrap0r.sh` is the entry point. Run it directly or via the curl-pipe one-liner from the README. Phases run in fixed order:
-
-1. `phase_umask_walk`        — chmod `$HOME` to match `$UMASK` (077 default, 022 alt)
-2. `phase_sudoers`           — install `/etc/sudoers.d/00-bootstrap0r-defaults`
-3. `phase_apt_base`          — i386 multiarch, `apt update` + `full-upgrade` + `autoremove --purge` + `autoclean`, then install base/gaming packages (incl. `zsh`, prereq for nadrbomz)
-4. `phase_nadrbomz`          — curl-pipe `https://github.com/zeroznet/nadrbomz`
-5. `phase_chrome`            — Google official `.deb`
-6. `phase_steam`             — Valve official `.deb`
-7. `phase_flatpak_protonplus` — Flathub + `com.vysp3r.ProtonPlus` + Steam path overrides
-8. `phase_finalize`          — reserved hook (no-op today)
-
-Flags: `--help`, `--dry-run`, `--allow-root`. Env: `UMASK=077|022`, `ROOTPW=0|1` (opt-in `Defaults rootpw`; preflight refuses if root is locked/empty). Logs to `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log`.
+`bootstrap0r.sh` is the entry point. Run it directly or via the curl-pipe one-liner from the README. Phases, flags and env vars live in `usage()` (`sh bootstrap0r.sh --help`); keep the README in sync when they change.
 
 The `BOOTSTRAP0R_NO_MAIN=1` guard at the bottom of the script lets you `source` it for per-phase debugging:
 
@@ -58,7 +48,6 @@ BOOTSTRAP0R_NO_MAIN=1 . ./bootstrap0r.sh
 phase_sudoers   # for example
 ```
 
-
 ## Repo
 
-Public GitHub repo will be attached. Until then this is local-only. License default is BSD-2-Clause per workspace policy.
+Public at https://github.com/zeroznet/bootstrap0r, BSD-2-Clause. CI (`.github/workflows/ci.yml`) runs shellcheck, a dash parse and a `--help` smoke run; it never executes a phase.
