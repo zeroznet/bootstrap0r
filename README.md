@@ -55,11 +55,6 @@ Dry run (after cloning):
 
 - `UMASK` — `077` (default) or `022`. Other values rejected.
 
-## Files
-
-- `bootstrap0r.sh` — bootstrap script
-- `LICENSE` — BSD-2-Clause
-
 ## Logs
 
 `/tmp/bootstrap0r-YYYYMMDDHHMMSS.log` — full apt/flatpak output per run.
