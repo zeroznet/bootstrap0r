@@ -1,7 +1,13 @@
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Claude Code local settings (per-developer permission allowlist; never committed)
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# Local env / secrets
 .env
 .env.*
-*.swp
-.DS_Store
-HANDOFF.md
-HANDOFF.md.bak
