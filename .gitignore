@@ -2,12 +2,30 @@
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
 *.swp
+*~
 
-# Claude Code local settings (per-developer permission allowlist; never committed)
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
+# Claude Code local state and session artifacts
+**/.claude/settings.local.json
+**/.claude/scheduled_tasks.lock
+HANDOFF.md
+HANDOFF.md.bak
 
-# Local env / secrets
+# Secrets
 .env
 .env.*
+!.env.example
+.credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Leftovers
+*.bak
+*.orig
+*.rej
+*.tmp
