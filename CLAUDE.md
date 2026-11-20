@@ -15,7 +15,7 @@ Primary target is **Debian 13 (trixie)** on x86_64, matching the host this repo 
 ## Scope
 
 In scope:
-- Shell/login defaults (umask, PATH, locale).
+- Shell/login defaults (umask).
 - APT sources, keyrings, and package installs.
 - Third-party repos installed the supported way (signed-by keyrings under `/etc/apt/keyrings`, never `apt-key`).
 
